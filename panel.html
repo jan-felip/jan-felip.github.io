@@ -1,0 +1,198 @@
+<!--
+  Aplicació HTML amb una graella de 3x4 de botons quadrats per a mòbils.
+  Disseny fosc (#131313) amb botons subtils (stealth).
+  L'únic efecte visual és una forta il·luminació en prémer, que es manté.
+  Quan 4 botons estan il·luminats, es comprova la seqüència i es reinicien tots després de 0.25 segons.
+  Ombres dels botons de color #19DAE6.
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graella de Botons Interactiva</title>
+    <!-- Inclou Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configurem la tipografia Inter per defecte */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Fons fosc general: #131313 */
+            background-color: #131313;
+        }
+
+        /* Estil per al botó base "Stealth" */
+        .stealth-button {
+            /* Fons del botó: #131313 */
+            background-color: #131313; 
+            /* Ombra CIAN subtil per defecte (#19DAE6 amb 30% d'opacitat) */
+            box-shadow: 0 10px 15px -3px rgba(25, 218, 230, 0.3);
+            border: none;
+            /* Transicions ràpides per a una bona resposta tàctil */
+            transition: all 0.1s ease-out;
+            cursor: pointer;
+            /* Evita la selecció de text en pantalles tàctils */
+            user-select: none;
+        }
+
+        /* Classe que s'afegeix amb JS per mantenir l'estat d'il·luminació */
+        .stealth-button.illuminated {
+            /* Ombra interior i exterior molt més intensa, amb el nou color cian brillant */
+            box-shadow: 
+                0 0 15px rgba(255, 255, 255, 0.4), /* Resplendor blanc interior */
+                0 0 40px #19DAE6, /* Resplendor CIAN exterior brillant */
+                inset 0 0 10px rgba(25, 218, 230, 0.8); /* Il·luminació interior CIAN */
+            /* Fons del botó il·luminat: #131313 per mantenir l'uniformitat fosca */
+            background-color: #131313;
+        }
+
+        /* Estil active per a feedback instantani al clic/tap */
+        .stealth-button:active {
+            /* Una petita pulsació visual immediata */
+            transform: scale(0.98); 
+        }
+
+        /* Assegurem que els botons reaccionin a l'estat focus quan s'utilitza el teclat */
+        .stealth-button:focus {
+             outline: 2px solid #19DAE6; /* Anell de focus CIAN per accessibilitat */
+             outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 flex items-center justify-center min-h-screen bg-[#131313]">
+
+    <!-- El contenidor principal centrat en la pantalla. S'ha ELIMINAT 'shadow-2xl shadow-black/50' -->
+    <div class="max-w-xs w-full mx-auto bg-[#131313] rounded-xl p-4 sm:p-6">
+        
+        <!-- Contenidor de la graella: 3 columnes, 4 files = 12 botons total -->
+        <div class="grid grid-cols-3 gap-4" id="button-grid">
+
+            <!-- Generació dels 12 botons amb el nou atribut data-index -->
+            <!-- Fila 1 -->
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 1" data-index="1"></button>
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 2" data-index="2"></button>
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 3" data-index="3"></button>
+
+            <!-- Fila 2 -->
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 4" data-index="4"></button>
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 5" data-index="5"></button>
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 6" data-index="6"></button>
+
+            <!-- Fila 3 -->
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 7" data-index="7"></button>
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 8" data-index="8"></button>
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 9" data-index="9"></button>
+
+            <!-- Fila 4 -->
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 10" data-index="10"></button>
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 11" data-index="11"></button>
+            <button class="w-full aspect-square rounded-xl stealth-button" aria-label="Botó 12" data-index="12"></button>
+        </div>
+    </div>
+
+    <script>
+        // Array per emmagatzemar la referència als botons actualment il·luminats (per apagar-los)
+        let illuminatedButtons = [];
+        // Array per emmagatzemar l'índex dels botons il·luminats, en l'ordre en què han estat premuts (per la seqüència)
+        let pressSequence = [];
+
+        // Temps de reinici fixat a 0.25 segons (250 ms)
+        const RESET_TIMEOUT_MS = 250; 
+        // Nombre de botons a prémer abans del reinici
+        const MAX_ILLUMINATED_BUTTONS = 4;
+
+        // Combinacions secretes (s'han de prémer en l'ordre exacte)
+        const COMBINATIONS = [
+            { sequence: [1, 2, 3, 4], url: 'https://panel.cubecat.dev' }, 
+            { sequence: [2, 4, 6, 8], url: 'https://script.google.com/macros/s/AKfycbzMWrFz6nM_Rdv5omJj62y-NY0e2OmOY7ngvqn7Ia63V1_GR1J676Htu2_UuVcdXDk0Jw/exec' }, 
+            { sequence: [5, 7, 8, 9], url: 'https://www.cubecat.cat' } 
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = document.querySelectorAll('.stealth-button');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    toggleIllumination(button);
+                });
+            });
+        });
+
+        // Funció auxiliar per comparar dos arrays de números
+        const arraysEqual = (a, b) => a.length === b.length && a.every((val, index) => val === b[index]);
+
+        function toggleIllumination(button) {
+            const index = parseInt(button.dataset.index, 10);
+            const isIlluminated = button.classList.contains('illuminated');
+
+            if (isIlluminated) {
+                // Des-seleccionar
+                button.classList.remove('illuminated');
+                
+                // Eliminem l'element i l'índex dels arrays
+                illuminatedButtons = illuminatedButtons.filter(btn => btn !== button);
+                pressSequence = pressSequence.filter(i => i !== index);
+
+            } else if (illuminatedButtons.length < MAX_ILLUMINATED_BUTTONS) {
+                // Seleccionar (només si no hem arribat al límit)
+                button.classList.add('illuminated');
+                
+                // Afegim l'element i l'índex als arrays
+                illuminatedButtons.push(button);
+                pressSequence.push(index);
+
+                // Comprovem el nou recompte després d'afegir el botó
+                checkButtonCount();
+            }
+        }
+
+        function checkButtonCount() {
+            if (illuminatedButtons.length === MAX_ILLUMINATED_BUTTONS) {
+                
+                // 1. Desactivem els clics mentre s'espera la comprovació i el reinici
+                const allButtons = document.querySelectorAll('.stealth-button');
+                allButtons.forEach(btn => btn.disabled = true);
+                
+                // 2. Comprovem si la seqüència actual coincideix amb alguna combinació
+                let urlToOpen = null;
+                
+                // pressSequence ja conté la seqüència dels 4 botons premuts, en l'ordre correcte.
+                const currentSequence = pressSequence.slice(); 
+
+                for (const combo of COMBINATIONS) {
+                    if (arraysEqual(currentSequence, combo.sequence)) {
+                        urlToOpen = combo.url;
+                        break;
+                    }
+                }
+                
+                // 3. Si hi ha una coincidència, obrim la URL en la pestanya actual
+                if (urlToOpen) {
+                    // Obre a la mateixa pestanya
+                    window.open(urlToOpen, '_self'); 
+                    return; // Sortim sense programar el setTimeout de reset, ja que la pàgina canviarà
+                }
+
+                // 4. Si no hi ha coincidència, programem el reinici visual
+                setTimeout(() => {
+                    resetAllButtons();
+                    // Reactivam els clics
+                    allButtons.forEach(btn => btn.disabled = false);
+                }, RESET_TIMEOUT_MS); 
+            }
+        }
+
+        function resetAllButtons() {
+            // Apaga tots els botons que estan a l'array 'illuminatedButtons'
+            illuminatedButtons.forEach(button => {
+                button.classList.remove('illuminated');
+            });
+            
+            // Buidem ambdós arrays per començar una nova seqüència
+            illuminatedButtons = [];
+            pressSequence = [];
+        }
+    </script>
+
+</body>
+</html>
