@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ca">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Jan Felip</title>
+        
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+        
+        <!-- Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['Inter', 'sans-serif'],
+                            oswald: ['Oswald', 'sans-serif'],
+                        },
+                        colors: {
+                            'brand-teal': '#8fb4b2',
+                            'brand-dark': '#222222'
+                        }
+                    }
+                }
+            }
+        </script>
+
+        <!-- Custom CSS per Animacions i Interaccions -->
+        <style>
+            /* Fons inicial blanc i bloqueig de scroll inicial */
+            body {
+                background-color: #ffffff; 
+            }
+            
+            body.no-scroll {
+                overflow: hidden;
+                height: 100vh;
+            }
+
+            /* Animacions de Backgrounds (Franges) */
+            .bg-clip-x {
+                clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+                transition: clip-path 1s cubic-bezier(0.77, 0, 0.175, 1);
+            }
+            .bg-clip-y {
+                clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+                transition: clip-path 1s cubic-bezier(0.77, 0, 0.175, 1);
+            }
+            .clip-full {
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%) !important;
+            }
+
+            /* Classes Typewriter */
+            .char {
+                display: inline;
+                transition: opacity 0.05s ease;
+            }
+            
+            /* Animacions Subratllat */
+            .title-highlight-bg {
+                transition: width 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+            }
+            .w-full-anim {
+                width: 100% !important;
+            }
+            
+            @keyframes redrawLine {
+                0% { width: 0%; }
+                100% { width: 100%; }
+            }
+            .group:hover .title-highlight-bg.w-full-anim {
+                animation: redrawLine 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            }
+            
+            /* Estils de llista */
+            ul.custom-bullet li {
+                position: relative;
+                padding-left: 1.5rem;
+                margin-bottom: 0.75rem;
+            }
+            ul.custom-bullet li::before {
+                content: '→';
+                position: absolute;
+                left: 0;
+                color: #8fb4b2;
+                font-weight: bold;
+            }
+
+            /* --- TRANSICIONS CAPÇALERA --- */
+            #top-bar { 
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                transition: box-shadow 0.4s ease; 
+            }
+            
+            #photo-container { 
+                transition: max-width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, border-width 0.4s ease; 
+                max-width: 100%; 
+                overflow: hidden;
+            }
+            @media (min-width: 768px) { #photo-container { max-width: 30%; } }
+            @media (min-width: 1280px) { #photo-container { max-width: 25%; } }
+
+            #header-wrapper { 
+                transition: max-width 0.6s cubic-bezier(0.4, 0, 0.2, 1), flex-basis 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1), padding 0.6s ease; 
+            }
+
+            h1.font-oswald { transition: gap 0.4s ease, flex-direction 0.4s ease; }
+            .name-part { transition: font-size 0.5s ease, line-height 0.5s ease; }
+            #title-job { transition: font-size 0.4s ease, opacity 0.4s ease, height 0.4s ease, margin 0.4s ease; overflow: hidden; }
+            
+            #menu-btn-container { 
+                transition: opacity 0.4s ease, transform 0.4s ease; 
+                display: none;
+            }
+
+            /* --- ESTATS DE SCROLL ACTIU --- */
+            body.is-scrolled #top-bar {
+                box-shadow: 0 10px 30px -10px rgba(0,0,0,0.15);
+            }
+            
+            body.is-scrolled #photo-container {
+                max-width: 0% !important;
+                height: 0px !important;
+                opacity: 0 !important;
+                border-width: 0px !important;
+            }
+            
+            body.is-scrolled #header-wrapper {
+                max-width: 100% !important;
+                flex-basis: 100% !important;
+                height: 5.5rem !important; /* 88px navbar */
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+            }
+            
+            body.is-scrolled .name-part {
+                font-size: 1.5rem !important; /* text-2xl */
+                line-height: 1.2 !important;
+            }
+            
+            @media (min-width: 768px) {
+                body.is-scrolled h1.font-oswald {
+                    flex-direction: row !important;
+                    align-items: center;
+                    gap: 0.4rem;
+                }
+            }
+            
+            body.is-scrolled #title-job {
+                font-size: 0 !important;
+                opacity: 0 !important;
+                margin-top: 0 !important;
+                height: 0 !important;
+            }
+            
+            body.is-scrolled #menu-btn-container {
+                display: block;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                transform: translateX(0) !important;
+            }
+        </style>
+    </head>
+    <!-- 'no-scroll' per defecte. El treu el JS al acabar d'escriure -->
+    <body class="font-sans selection:bg-brand-teal selection:text-white relative overflow-x-hidden bg-white no-scroll">
+
+        <!-- Navbar Dropdown Menu (Targetes Desplegables) -->
+        <div id="dropdown-menu" class="fixed top-[90px] right-6 md:right-12 z-[70] flex flex-col gap-3 pointer-events-none">
+            <a href="#" class="menu-item opacity-0 translate-x-12 transition-all duration-300 ease-out backdrop-blur-md bg-brand-teal/85 border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.15)] px-8 py-3.5 font-oswald text-white uppercase tracking-widest text-sm font-semibold hover:bg-brand-teal hover:scale-[1.03] transform origin-right">Inici</a>
+            <a href="#" class="menu-item opacity-0 translate-x-12 transition-all duration-300 ease-out backdrop-blur-md bg-brand-teal/85 border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.15)] px-8 py-3.5 font-oswald text-white uppercase tracking-widest text-sm font-semibold hover:bg-brand-teal hover:scale-[1.03] transform origin-right">Sobre mi</a>
+            <a href="#" class="menu-item opacity-0 translate-x-12 transition-all duration-300 ease-out backdrop-blur-md bg-brand-teal/85 border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.15)] px-8 py-3.5 font-oswald text-white uppercase tracking-widest text-sm font-semibold hover:bg-brand-teal hover:scale-[1.03] transform origin-right">Currículum</a>
+        </div>
+
+        <!-- Estructura Principal a pantalla completa -->
+        <div class="max-w-[1400px] mx-auto w-full relative flex flex-col">
+            
+            <!-- ================= TOP BAR ================= -->
+            <div id="top-bar" class="flex flex-col md:flex-row w-full bg-transparent">
+                
+                
+                <!-- Espai Foto -->
+                <div id="photo-container" class="relative w-full md:w-[30%] xl:w-[25%] h-64 md:h-80 shrink-0 bg-gray-50 flex flex-col items-center justify-center text-gray-400 z-20">
+                    
+                    <img src="walker.jpg">
+
+                    <!-- <svg class="w-10 h-10 mb-2 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="font-medium text-xs tracking-widest uppercase">Espai per fotografia</span> -->
+                </div>
+
+                <!-- Header (Creix cap a l'esquerra fins omplir el 100%) -->
+                <div id="header-wrapper" class="relative w-full flex-1 md:flex-none md:w-[70%] xl:w-[75%] h-72 md:h-80 shrink-0 flex items-center justify-between px-10 md:px-20 py-10 z-10 overflow-hidden">
+                    <div id="bg-header" class="absolute inset-0 bg-brand-teal z-0 bg-clip-x"></div>
+                    
+                    <!-- Títols -->
+                    <div id="sector-header" class="relative z-10 flex flex-col justify-center h-full typewriter-section w-full">
+                        <h1 class="font-oswald text-brand-dark font-bold uppercase tracking-tighter flex flex-col">
+                            <span class="name-part text-5xl md:text-7xl leading-[0.9] text-white">Jan Felip</span>
+                            <span class="name-part text-5xl md:text-7xl leading-[0.9] text-white">Urgell</span>
+                        </h1>
+                        <h2 id="title-job" class="font-oswald text-xl md:text-2xl text-white italic mt-5 uppercase font-bold">
+                            Desenvolupador Web
+                        </h2>
+                    </div>
+
+                    <!-- Botó Hamburguesa -->
+                    <div id="menu-btn-container" class="relative z-10 opacity-0 pointer-events-none transform translate-x-4 shrink-0">
+                        <button id="menu-btn" class="text-white hover:text-brand-dark transition-colors focus:outline-none flex items-center justify-center p-2 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= CONTINGUT INFERIOR ================= -->
+            <!-- La classe min-h-screen evita que el document es quedi curt al plegar-se -->
+            <div class="flex flex-col md:flex-row w-full flex-1 relative z-10 min-h-screen">
+                
+                <!-- Sidebar (Dades Personals) -->
+                <div class="w-full md:w-[30%] xl:w-[25%] relative bg-transparent flex flex-col pb-16">
+                    <div id="bg-sidebar" class="absolute inset-0 bg-brand-dark z-0 bg-clip-y"></div>
+                    
+                    <div id="sector-sidebar" class="relative z-10 px-8 py-10 md:px-12 md:py-12 text-gray-300 typewriter-section h-full">
+                        
+                        <!-- Sobre Mi -->
+                        <div class="mb-12">
+                            <div class="relative inline-block mb-5 group cursor-default">
+                                <h2 class="font-oswald text-2xl uppercase tracking-widest text-white relative z-10">Sobre Mi</h2>
+                                <span class="title-highlight-bg absolute bottom-0 left-0 h-2 bg-brand-teal w-0 z-[-1] opacity-90"></span>
+                            </div>
+                            <p class="text-sm leading-relaxed mb-4">
+                                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quisquam consequatur adipisci amet molestias. Ut, obcaecati sit fugit magni eius, asperiores nesciunt fuga velit suscipit beatae doloribus excepturi quas, enim culpa.
+                            </p>
+                            <p class="text-sm leading-relaxed">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit vel reprehenderit sequi explicabo nisi dolores molestiae, neque deserunt maiores quos voluptate quasi ratione, asperiores aliquam quisquam. Soluta delectus rem quaerat.
+                            </p>
+                        </div>
+
+                        <!-- Contacte -->
+                        <div class="mb-12">
+                            <div class="relative inline-block mb-5 group cursor-default">
+                                <h2 class="font-oswald text-2xl uppercase tracking-widest text-white relative z-10">Contacte</h2>
+                                <span class="title-highlight-bg absolute bottom-0 left-0 h-2 bg-brand-teal w-0 z-[-1] opacity-90"></span>
+                            </div>
+                            <ul class="space-y-5 text-sm font-medium text-white">
+                                <li class="flex items-center gap-4 hover:text-brand-teal transition-colors">
+                                    <svg class="w-5 h-5 opacity-80 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                    <a href="mailto:janfelip6@gmail.com" class="truncate">janfelip6@gmail.com</a>
+                                </li>
+                                <!-- <li class="flex items-center gap-4 hover:text-brand-teal transition-colors">
+                                    <svg class="w-5 h-5 opacity-80 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                                    <a href="https://jan-felip.github.io" target="_blank" class="truncate">jan-felip.github.io</a>
+                                </li> -->
+                                <li class="flex items-center gap-4">
+                                    <svg class="w-5 h-5 opacity-80 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    <span>Lleida, Catalunya</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Idiomes -->
+                        <div>
+                            <div class="relative inline-block mb-5 group cursor-default">
+                                <h2 class="font-oswald text-2xl uppercase tracking-widest text-white relative z-10">Idiomes</h2>
+                                <span class="title-highlight-bg absolute bottom-0 left-0 h-2 bg-brand-teal w-0 z-[-1] opacity-90"></span>
+                            </div>
+                            <div class="flex flex-col gap-3 text-sm">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white">Català / Castellà</span>
+                                    <span class="px-2 py-0.5 bg-brand-teal/20 text-brand-teal rounded text-xs font-bold uppercase">Natiu</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white">Anglès</span>
+                                    <span class="px-2 py-0.5 bg-white/10 rounded text-xs font-bold uppercase">Mitjà</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white">Francès</span>
+                                    <span class="px-2 py-0.5 bg-white/10 rounded text-xs font-bold uppercase">Bàsic</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contingut Principal Blanc -->
+                <div class="w-full md:w-[70%] xl:w-[75%] relative bg-white pb-20">
+                    <div id="bg-main" class="absolute inset-0 bg-white z-0 bg-clip-x"></div>
+                    
+                    <div id="sector-main" class="relative z-10 px-8 py-10 md:px-20 md:py-12 text-brand-dark typewriter-section max-w-5xl">
+                        
+                        <!-- Stack Tècnic -->
+                        <div class="mb-14">
+                            <div class="relative inline-block mb-8 group cursor-default">
+                                <h2 class="font-oswald text-3xl md:text-4xl uppercase tracking-widest text-brand-dark relative z-10">Stack Tècnic</h2>
+                                <span class="title-highlight-bg absolute bottom-0 left-0 h-2 bg-brand-teal w-0 z-[-1] opacity-30"></span>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <h3 class="text-sm uppercase tracking-widest text-gray-400 mb-3 font-bold">Llenguatges de Programació</h3>
+                                    <div class="flex flex-wrap gap-2.5">
+                                        <span class="px-4 py-1.5 bg-brand-teal/10 text-brand-teal border border-brand-teal/20 rounded-full text-sm font-medium hover:bg-brand-teal hover:text-white transition-colors cursor-default">HTML5</span>
+                                        <span class="px-4 py-1.5 bg-brand-teal/10 text-brand-teal border border-brand-teal/20 rounded-full text-sm font-medium hover:bg-brand-teal hover:text-white transition-colors cursor-default">CSS3</span>
+                                        <span class="px-4 py-1.5 bg-brand-teal/10 text-brand-teal border border-brand-teal/20 rounded-full text-sm font-medium hover:bg-brand-teal hover:text-white transition-colors cursor-default">JavaScript</span>
+                                        <span class="px-4 py-1.5 bg-brand-teal/10 text-brand-teal border border-brand-teal/20 rounded-full text-sm font-medium hover:bg-brand-teal hover:text-white transition-colors cursor-default">Java</span>
+                                        <span class="px-4 py-1.5 bg-brand-teal/10 text-brand-teal border border-brand-teal/20 rounded-full text-sm font-medium hover:bg-brand-teal hover:text-white transition-colors cursor-default">Python</span>
+                                        <span class="px-4 py-1.5 bg-brand-teal/10 text-brand-teal border border-brand-teal/20 rounded-full text-sm font-medium hover:bg-brand-teal hover:text-white transition-colors cursor-default">C++</span>
+                                        <span class="px-4 py-1.5 bg-brand-teal/10 text-brand-teal border border-brand-teal/20 rounded-full text-sm font-medium hover:bg-brand-teal hover:text-white transition-colors cursor-default">SQL</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm uppercase tracking-widest text-gray-400 mb-3 font-bold">Eines i Entorns</h3>
+                                    <div class="flex flex-wrap gap-2.5">
+                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors cursor-default">Git / GitHub</span>
+                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors cursor-default">VS Code</span>
+                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors cursor-default">IntelliJ IDEA</span>
+                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors cursor-default">Eclipse IDE</span>
+                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors cursor-default">Adobe Suite</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estudis -->
+                        <div class="mb-14">
+                            <div class="relative inline-block mb-8 group cursor-default">
+                                <h2 class="font-oswald text-3xl md:text-4xl uppercase tracking-widest text-brand-dark relative z-10">Formació</h2>
+                                <span class="title-highlight-bg absolute bottom-0 left-0 h-2 bg-brand-teal w-0 z-[-1] opacity-30"></span>
+                            </div>
+
+                            <div class="flex gap-6 mb-8 relative">
+                                <!-- Línia vertical -->
+                                <div class="absolute left-[33px] top-10 bottom-0 w-0.5 bg-gray-100"></div>
+                                
+                                <div class="text-brand-teal font-oswald text-2xl w-16 shrink-0 pt-0.5 text-right">Act.</div>
+                                <div class="relative w-full">
+                                    <div class="absolute -left-[45px] top-2.5 w-4 h-4 bg-brand-teal rounded-full shadow-[0_0_0_6px_white]"></div>
+                                    <h3 class="text-xl font-semibold text-gray-800 leading-tight">Tècnic Superior en Desenvolupament d'Aplicacions Web</h3>
+                                    <p class="text-base text-gray-500 font-medium mt-1.5">ILERNA (En procés)</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-6 relative">
+                                <div class="text-gray-300 font-oswald text-2xl w-16 shrink-0 pt-0.5 text-right">2025</div>
+                                <div class="relative w-full">
+                                    <div class="absolute -left-[45px] top-2.5 w-4 h-4 bg-gray-200 rounded-full shadow-[0_0_0_6px_white]"></div>
+                                    <h3 class="text-xl font-semibold text-gray-800 leading-tight">Batxillerat Tecnològic</h3>
+                                    <p class="text-base text-gray-500 font-medium mt-1.5">INS Manuel de Pedrolo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= Scripts de Lògica ================= -->
+        <script>
+            document.addEventListener('DOMContentLoaded', async () => {
+                
+                /* --- 1. LÒGICA TYPEWRITER SIMULTANI --- */
+                const wrappers = document.querySelectorAll('.typewriter-section');
+                wrappers.forEach(wrapper => {
+                    const walker = document.createTreeWalker(wrapper, NodeFilter.SHOW_TEXT, null, false);
+                    const textNodes = [];
+                    let node;
+                    while(node = walker.nextNode()) {
+                        if (node.nodeValue.trim() !== '') textNodes.push(node);
+                    }
+
+                    textNodes.forEach(textNode => {
+                        const text = textNode.nodeValue;
+                        const fragment = document.createDocumentFragment();
+                        for(let i = 0; i < text.length; i++) {
+                            const span = document.createElement('span');
+                            span.textContent = text[i];
+                            span.className = 'char opacity-0'; 
+                            fragment.appendChild(span);
+                        }
+                        textNode.parentNode.replaceChild(fragment, textNode);
+                    });
+                });
+
+                // Animació fons principals (amb un lleuger avantatge de 50ms)
+                setTimeout(() => {
+                    document.getElementById('bg-header').classList.add('clip-full');
+                    document.getElementById('bg-sidebar').classList.add('clip-full');
+                }, 50);
+
+                // Escriure sectors paral·lelament
+                const typeSector = (id, charsPerTick) => {
+                    return new Promise(resolve => {
+                        const chars = document.getElementById(id).querySelectorAll('.char');
+                        let i = 0;
+                        const tick = () => {
+                            let count = 0;
+                            while(i < chars.length && count < charsPerTick) {
+                                chars[i].classList.remove('opacity-0');
+                                i++;
+                                count++;
+                            }
+                            if (i < chars.length) requestAnimationFrame(tick);
+                            else resolve();
+                        };
+
+                        if (id = 'sector-main') {
+                            setTimeout(() => requestAnimationFrame(tick), 500);
+                        } else {
+                            setTimeout(() => requestAnimationFrame(tick), 100);
+                        }
+                    });
+                };
+
+                // ESCRIPTURA MÉS RÀPIDA)
+                await Promise.all([
+                    typeSector('sector-header', 2),  // Els números defineixen la velocitat d'escriptura
+                    typeSector('sector-sidebar', 6),
+                    typeSector('sector-main', 2)
+                ]);
+
+                // Subratllats quan el text ja ha acabat
+                document.querySelectorAll('.title-highlight-bg').forEach(el => {
+                    el.classList.add('w-full-anim');
+                });
+                
+                // DESBLOQUEIG DEL SCROLL AL ACABAR L'ANIMACIÓ 
+                setTimeout(() => {
+                    document.body.classList.remove('no-scroll');
+                }, 10);
+
+                /* --- 2. LÒGICA SCROLL (Unidireccional, zero bucles, ultra reactiu) --- */
+                let ticking = false;
+                let isScrolled = false;
+
+                window.addEventListener('scroll', () => {
+                    // Si ja s'ha encongit, s'ignora qualsevol altre scroll. Queda tancat permanentment.
+                    if (isScrolled) return;
+
+                    if (!ticking) {
+                        window.requestAnimationFrame(() => {
+                            const currentScroll = window.scrollY;
+
+                            // LLINDAR MOLT BAIX (5px): A la mínima que es baixa, s'activa.
+                            if (currentScroll > 5) {
+                                document.body.classList.add('is-scrolled');
+                                isScrolled = true;
+                            } 
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                });
+
+                /* --- 3. LÒGICA MENÚ DESPLEGABLE --- */
+                const menuBtn = document.getElementById('menu-btn');
+                const dropdownMenu = document.getElementById('dropdown-menu');
+                const menuItems = document.querySelectorAll('.menu-item');
+                window.isMenuOpen = false;
+                
+                window.toggleMenu = () => {
+                    isMenuOpen = !isMenuOpen;
+                    
+                    if (isMenuOpen) {
+                        dropdownMenu.classList.remove('pointer-events-none');
+                        // Animació d'entrada seqüencial (cascada)
+                        menuItems.forEach((item, index) => {
+                            setTimeout(() => {
+                                item.classList.remove('opacity-0', 'translate-x-12');
+                                item.classList.add('opacity-100', 'translate-x-0');
+                            }, index * 100); 
+                        });
+                    } else {
+                        dropdownMenu.classList.add('pointer-events-none');
+                        // Animació de sortida instantània per tots
+                        menuItems.forEach((item) => {
+                            item.classList.remove('opacity-100', 'translate-x-0');
+                            item.classList.add('opacity-0', 'translate-x-12');
+                        });
+                    }
+                };
+
+                menuBtn.addEventListener('click', toggleMenu);
+
+                document.addEventListener('click', (e) => {
+                    if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target) && isMenuOpen) {
+                        toggleMenu();
+                    }
+                });
+                
+                menuItems.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault(); 
+                        toggleMenu();
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
